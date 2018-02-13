@@ -62,6 +62,34 @@ func (a *ADB) ProxyGetAllAnonimous() []Proxy {
 	return proxies
 }
 
+func (a *ADB) ProxyGetUniqueHosts() []string {
+	var hosts []string
+	_, err := a.
+		db.
+		Query(&hosts, "SELECT DISTINCT host FROM proxies")
+	chkErr("ProxyGetUniqueHosts Query", err)
+	return hosts
+}
+
+func (a *ADB) ProxyGetFequentlyUsedPorts() []string {
+	var ports []string
+	_, err := a.
+		db.
+		Query(&ports, `
+			SELECT
+				port
+			FROM
+				proxies
+			GROUP BY
+				port
+			ORDER BY
+				count(port) DESC
+			LIMIT 10
+		`)
+	chkErr("ProxyGetFequentlyUsedPorts Query", err)
+	return ports
+}
+
 func (a *ADB) ProxyCreate(p Proxy) {
 	_, err := a.
 		db.

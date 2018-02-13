@@ -21,6 +21,7 @@ func InitDB(addr, user, password string) (*pg.DB, error) {
 	_, err := db.Exec("SELECT NULL LIMIT 0")
 	return db, err
 }
+
 func (a *ADB) UseDebug(value bool) {
 	debug = value
 }
