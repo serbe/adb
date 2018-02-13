@@ -12,7 +12,8 @@ type ADB struct {
 	db *pg.DB
 }
 
-func InitDB(database, addr, user, password string) (*pg.DB, error) {
+func InitDB(database, addr, user, password string) (*ADB, error) {
+	a := new(ADB)
 	db := pg.Connect(&pg.Options{
 		Database: database,
 		Addr:     addr,
@@ -20,7 +21,8 @@ func InitDB(database, addr, user, password string) (*pg.DB, error) {
 		Password: password,
 	})
 	_, err := db.Exec("SELECT NULL LIMIT 0")
-	return db, err
+	a.db = db
+	return a, err
 }
 
 func (a *ADB) UseDebug(value bool) {
