@@ -90,19 +90,21 @@ func (a *ADB) ProxyGetFequentlyUsedPorts() []string {
 	return ports
 }
 
-func (a *ADB) ProxyCreate(p Proxy) {
+func (a *ADB) ProxyCreate(p Proxy) error {
 	_, err := a.
 		db.
 		Model(&p).
 		Insert(&p)
 	chkErr("ProxyCreate Insert", err)
+	return err
 }
 
-func (a *ADB) ProxyUpdate(p Proxy) {
+func (a *ADB) ProxyUpdate(p Proxy) error {
 	_, err := a.
 		db.
 		Model(&p).
 		Where("hostname = ", p.Hostname).
 		Update(&p)
 	chkErr("ProxyUpdate Update", err)
+	return err
 }
