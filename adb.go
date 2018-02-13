@@ -12,8 +12,9 @@ type ADB struct {
 	db *pg.DB
 }
 
-func InitDB(addr, user, password string) (*pg.DB, error) {
+func InitDB(database, addr, user, password string) (*pg.DB, error) {
 	db := pg.Connect(&pg.Options{
+		Database: database,
 		Addr:     addr,
 		User:     user,
 		Password: password,
