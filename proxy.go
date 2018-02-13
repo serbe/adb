@@ -6,17 +6,17 @@ import (
 
 // Proxy - proxy unit
 type Proxy struct {
-	Insert   bool          `sql:"-"           json:"-"`
-	Update   bool          `sql:"-"           json:"-"`
-	IsWork   bool          `sql:"work"        json:"-"`
-	IsAnon   bool          `sql:"anon"        json:"-"`
-	Checks   int           `sql:"checks"      json:"-"`
-	Hostname string        `sql:"hostname,pk" json:"hostname"`
-	Host     string        `sql:"host"        json:"-"`
-	Port     string        `sql:"port"        json:"-"`
-	CreateAt time.Time     `sql:"create_at"   json:"-"`
-	UpdateAt time.Time     `sql:"update_at"   json:"-"`
-	Response time.Duration `sql:"response"    json:"-"`
+	Insert   bool          `sql:"-"                   json:"-"`
+	Update   bool          `sql:"-"                   json:"-"`
+	IsWork   bool          `sql:"work,notnull"        json:"-"`
+	IsAnon   bool          `sql:"anon,notnull"        json:"-"`
+	Checks   int           `sql:"checks,notnull"      json:"-"`
+	Hostname string        `sql:"hostname,pk,notnull" json:"hostname"`
+	Host     string        `sql:"host,notnull"        json:"-"`
+	Port     string        `sql:"port,notnull"        json:"-"`
+	CreateAt time.Time     `sql:"create_at,notnull"   json:"-"`
+	UpdateAt time.Time     `sql:"update_at,notnull"   json:"-"`
+	Response time.Duration `sql:"response,notnull"    json:"-"`
 }
 
 func (a *ADB) ProxyGetAll() []Proxy {
@@ -103,7 +103,7 @@ func (a *ADB) ProxyUpdate(p Proxy) error {
 	_, err := a.
 		db.
 		Model(&p).
-		Where("hostname = ", p.Hostname).
+		Where("hostname = ?", p.Hostname).
 		Update(&p)
 	chkErr("ProxyUpdate Update", err)
 	return err

@@ -6,12 +6,12 @@ import (
 
 // Link - link unit
 type Link struct {
-	Insert   bool      `sql:"-"           json:"-"`
-	Update   bool      `sql:"-"           json:"-"`
-	Iterate  bool      `sql:"iterate"     json:"-"`
-	Num      int64     `sql:"num"         json:"-"`
-	Hostname string    `sql:"hostname,pk" json:"hostname"`
-	UpdateAt time.Time `sql:"update_at"   json:"-"`
+	Insert   bool      `sql:"-"                   json:"-"`
+	Update   bool      `sql:"-"                   json:"-"`
+	Iterate  bool      `sql:"iterate,notnull"     json:"-"`
+	Num      int64     `sql:"num,notnull"         json:"-"`
+	Hostname string    `sql:"hostname,pk,notnull" json:"hostname"`
+	UpdateAt time.Time `sql:"update_at,notnull"   json:"-"`
 }
 
 func (a *ADB) LinksGetAll() []Link {
@@ -53,7 +53,7 @@ func (a *ADB) LinkCreate(l Link) error {
 }
 
 func (a *ADB) LinkUpdate(l Link) error {
-	_, err := a.db.Model(&l).Where("hostname =", l.Hostname).Update(&l)
+	_, err := a.db.Model(&l).Where("hostname = ?", l.Hostname).Update(&l)
 	chkErr("LinkUpdate Update", err)
 	return err
 }
