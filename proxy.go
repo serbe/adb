@@ -25,7 +25,7 @@ func (a *ADB) ProxyGetAll() []Proxy {
 		db.
 		Model(&proxies).
 		Select()
-	chkErr("ProxyGetAll select", err)
+	chkErr("ProxyGetAll Select", err)
 	return proxies
 }
 
@@ -36,7 +36,7 @@ func (a *ADB) ProxyGetAllOld() []Proxy {
 		Model(&proxies).
 		Where("update_at < NOW() - (INTERVAL '3 days') * checks").
 		Select()
-	chkErr("ProxyGetAllOld select", err)
+	chkErr("ProxyGetAllOld Select", err)
 	return proxies
 }
 
@@ -47,7 +47,7 @@ func (a *ADB) ProxyGetAllWorking() []Proxy {
 		Model(&proxies).
 		Where("work = true").
 		Select()
-	chkErr("ProxyGetAllWorking select", err)
+	chkErr("ProxyGetAllWorking Select", err)
 	return proxies
 }
 
@@ -58,6 +58,23 @@ func (a *ADB) ProxyGetAllAnonimous() []Proxy {
 		Model(&proxies).
 		Where("anon = true").
 		Select()
-	chkErr("ProxyGetAllAnonimous select", err)
+	chkErr("ProxyGetAllAnonimous Select", err)
 	return proxies
+}
+
+func (a *ADB) ProxyCreate(p Proxy) {
+	_, err := a.
+		db.
+		Model(&p).
+		Insert(&p)
+	chkErr("ProxyCreate Insert", err)
+}
+
+func (a *ADB) ProxyUpdate(p Proxy) {
+	_, err := a.
+		db.
+		Model(&p).
+		Where("hostname = ", p.Hostname).
+		Update(&p)
+	chkErr("ProxyUpdate Update", err)
 }

@@ -43,3 +43,13 @@ func (a *ADB) LinksGetAllOld() []Link {
 	chkErr("LinksGetAllOld select", err)
 	return links
 }
+
+func (a *ADB) LinkCreate(l Link) {
+	_, err := a.db.Model(&l).Insert(&l)
+	chkErr("LinkCreate Insert", err)
+}
+
+func (a *ADB) LinkUpdate(l Link) {
+	_, err := a.db.Model(&l).Where("hostname =", l.Hostname).Update(&l)
+	chkErr("LinkUpdate Update", err)
+}
