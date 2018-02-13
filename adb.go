@@ -30,7 +30,7 @@ func (a *ADB) UseDebug(value bool) {
 }
 
 func chkErr(msg string, err error) {
-	if debug {
+	if debug && err != nil {
 		log.Println("error:", msg, err)
 	}
 }

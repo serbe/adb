@@ -1,6 +1,8 @@
 package adb
 
-import "time"
+import (
+	"time"
+)
 
 // Link - link unit
 type Link struct {
