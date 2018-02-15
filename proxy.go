@@ -51,14 +51,14 @@ func (a *ADB) ProxyGetAllWorking() []Proxy {
 	return proxies
 }
 
-func (a *ADB) ProxyGetAllAnonimous() []Proxy {
+func (a *ADB) ProxyGetAllAnonymous() []Proxy {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Where("anon = true").
 		Select()
-	chkErr("ProxyGetAllAnonimous Select", err)
+	chkErr("ProxyGetAllAnonymous Select", err)
 	return proxies
 }
 
@@ -71,7 +71,7 @@ func (a *ADB) ProxyGetUniqueHosts() []string {
 	return hosts
 }
 
-func (a *ADB) ProxyGetFequentlyUsedPorts() []string {
+func (a *ADB) ProxyGetFrequentlyUsedPorts() []string {
 	var ports []string
 	_, err := a.
 		db.
@@ -86,25 +86,23 @@ func (a *ADB) ProxyGetFequentlyUsedPorts() []string {
 				count(port) DESC
 			LIMIT 10
 		`)
-	chkErr("ProxyGetFequentlyUsedPorts Query", err)
+	chkErr("ProxyGetFrequentlyUsedPorts Query", err)
 	return ports
 }
 
-func (a *ADB) ProxyCreate(p Proxy) error {
+func (a *ADB) ProxyInsert(p Proxy) {
 	_, err := a.
 		db.
 		Model(&p).
 		Insert(&p)
-	chkErr("ProxyCreate Insert", err)
-	return err
+	chkErr("ProxyInsert", err)
 }
 
-func (a *ADB) ProxyUpdate(p Proxy) error {
+func (a *ADB) ProxyUpdate(p Proxy) {
 	_, err := a.
 		db.
 		Model(&p).
 		Where("hostname = ?", p.Hostname).
 		Update(&p)
-	chkErr("ProxyUpdate Update", err)
-	return err
+	chkErr("ProxyUpdate", err)
 }

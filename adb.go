@@ -2,17 +2,18 @@ package adb
 
 import (
 	"log"
+	"os"
 
 	"github.com/go-pg/pg"
 )
 
-var debug bool
+var useShowError bool
 
 type ADB struct {
 	db *pg.DB
 }
 
-func InitDB(database, addr, user, password string) (*ADB, error) {
+func InitDB(database, addr, user, password string) *ADB {
 	a := new(ADB)
 	db := pg.Connect(&pg.Options{
 		Database: database,
@@ -21,16 +22,16 @@ func InitDB(database, addr, user, password string) (*ADB, error) {
 		Password: password,
 	})
 	_, err := db.Exec("SELECT NULL LIMIT 0")
+	if err != nil {
+		log.Println("InitDB error: ", err)
+		os.Exit(1)
+	}
 	a.db = db
-	return a, err
-}
-
-func (a *ADB) UseDebug(value bool) {
-	debug = value
+	return a
 }
 
 func chkErr(msg string, err error) {
-	if debug && err != nil {
+	if useShowError && err != nil {
 		log.Println("error:", msg, err)
 	}
 }
