@@ -34,7 +34,7 @@ func (a *ADB) ProxyGetAllOld() []Proxy {
 	err := a.
 		db.
 		Model(&proxies).
-		Where("update_at < NOW() - (INTERVAL '3 days') * checks").
+		Where("update_at < NOW() - (INTERVAL '7 days') * checks").
 		Select()
 	chkErr("ProxyGetAllOld Select", err)
 	return proxies
