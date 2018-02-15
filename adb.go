@@ -35,3 +35,7 @@ func chkErr(msg string, err error) {
 		log.Println("error:", msg, err)
 	}
 }
+
+func (a *ADB) ShowErrors(v bool) {
+	useShowError = v
+}
