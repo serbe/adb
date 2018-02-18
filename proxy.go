@@ -10,6 +10,7 @@ type Proxy struct {
 	Update   bool          `sql:"-"                   json:"-"`
 	IsWork   bool          `sql:"work,notnull"        json:"-"`
 	IsAnon   bool          `sql:"anon,notnull"        json:"-"`
+	SSL      bool          `sql:"ssl,notnull"        json:"-"`
 	Checks   int           `sql:"checks,notnull"      json:"-"`
 	Hostname string        `sql:"hostname,pk,notnull" json:"hostname"`
 	Host     string        `sql:"host,notnull"        json:"-"`
