@@ -14,6 +14,7 @@ type Link struct {
 	UpdateAt time.Time `sql:"update_at,notnull"   json:"-"`
 }
 
+// LinksGetAll - get all links
 func (a *ADB) LinksGetAll() []Link {
 	var links []Link
 	err := a.
@@ -24,6 +25,7 @@ func (a *ADB) LinksGetAll() []Link {
 	return links
 }
 
+// LinksGetAllIterate - get all iterate links
 func (a *ADB) LinksGetAllIterate() []Link {
 	var links []Link
 	err := a.
@@ -35,6 +37,7 @@ func (a *ADB) LinksGetAllIterate() []Link {
 	return links
 }
 
+// LinksGetAllOld - get all old links
 func (a *ADB) LinksGetAllOld() []Link {
 	var links []Link
 	err := a.
@@ -46,11 +49,13 @@ func (a *ADB) LinksGetAllOld() []Link {
 	return links
 }
 
+// LinkInsert - insert new link
 func (a *ADB) LinkInsert(l Link) {
 	_, err := a.db.Model(&l).Insert(&l)
 	chkErr("LinkInsert", err)
 }
 
+// LinkUpdate - update existing link
 func (a *ADB) LinkUpdate(l Link) {
 	_, err := a.db.Model(&l).Where("hostname = ?", l.Hostname).Update(&l)
 	chkErr("LinkUpdate", err)

@@ -9,10 +9,12 @@ import (
 
 var useShowError bool
 
+// ADB - structure for interacting with the database
 type ADB struct {
 	db *pg.DB
 }
 
+// InitDB - initialise database connection
 func InitDB(database, addr, user, password string) *ADB {
 	a := new(ADB)
 	db := pg.Connect(&pg.Options{
@@ -36,6 +38,7 @@ func chkErr(msg string, err error) {
 	}
 }
 
+// ShowErrors - show error
 func (a *ADB) ShowErrors(v bool) {
 	useShowError = v
 }

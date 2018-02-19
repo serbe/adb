@@ -20,6 +20,7 @@ type Proxy struct {
 	Response time.Duration `sql:"response,notnull"    json:"-"`
 }
 
+// ProxyGetAll - get all proxies
 func (a *ADB) ProxyGetAll() []Proxy {
 	var proxies []Proxy
 	err := a.
@@ -30,6 +31,19 @@ func (a *ADB) ProxyGetAll() []Proxy {
 	return proxies
 }
 
+// ProxyGetAllScheme - get all proxies by scheme
+func (a *ADB) ProxyGetAllScheme(v string) []Proxy {
+	var proxies []Proxy
+	err := a.
+		db.
+		Model(&proxies).
+		Where("scheme = ?", v).
+		Select()
+	chkErr("ProxyGetAll Select", err)
+	return proxies
+}
+
+// ProxyGetAllOld - get all old proxies
 func (a *ADB) ProxyGetAllOld() []Proxy {
 	var proxies []Proxy
 	err := a.
@@ -41,6 +55,7 @@ func (a *ADB) ProxyGetAllOld() []Proxy {
 	return proxies
 }
 
+// ProxyGetAllWorking - get all working proxies
 func (a *ADB) ProxyGetAllWorking() []Proxy {
 	var proxies []Proxy
 	err := a.
@@ -52,6 +67,19 @@ func (a *ADB) ProxyGetAllWorking() []Proxy {
 	return proxies
 }
 
+// ProxyGetAllWorkingScheme - get all working proxies by scheme
+func (a *ADB) ProxyGetAllWorkingScheme(v string) []Proxy {
+	var proxies []Proxy
+	err := a.
+		db.
+		Model(&proxies).
+		Where("work = true ANS scheme = ?", v).
+		Select()
+	chkErr("ProxyGetAllWorking Select", err)
+	return proxies
+}
+
+// ProxyGetAllAnonymous - get all anonimous proxies
 func (a *ADB) ProxyGetAllAnonymous() []Proxy {
 	var proxies []Proxy
 	err := a.
@@ -63,6 +91,19 @@ func (a *ADB) ProxyGetAllAnonymous() []Proxy {
 	return proxies
 }
 
+// ProxyGetAllAnonymousScheme - get all anonimous proxies by scheme
+func (a *ADB) ProxyGetAllAnonymousScheme(v string) []Proxy {
+	var proxies []Proxy
+	err := a.
+		db.
+		Model(&proxies).
+		Where("anon = true AND scheme = ?", v).
+		Select()
+	chkErr("ProxyGetAllAnonymous Select", err)
+	return proxies
+}
+
+// ProxyGetUniqueHosts - gel all unique hosts
 func (a *ADB) ProxyGetUniqueHosts() []string {
 	var hosts []string
 	_, err := a.
@@ -72,6 +113,7 @@ func (a *ADB) ProxyGetUniqueHosts() []string {
 	return hosts
 }
 
+// ProxyGetFrequentlyUsedPorts - get 10 frequently used ports
 func (a *ADB) ProxyGetFrequentlyUsedPorts() []string {
 	var ports []string
 	_, err := a.
@@ -91,6 +133,7 @@ func (a *ADB) ProxyGetFrequentlyUsedPorts() []string {
 	return ports
 }
 
+// ProxyInsert - insert new proxy
 func (a *ADB) ProxyInsert(p Proxy) {
 	_, err := a.
 		db.
@@ -99,6 +142,7 @@ func (a *ADB) ProxyInsert(p Proxy) {
 	chkErr("ProxyInsert", err)
 }
 
+// ProxyUpdate - update existing proxy
 func (a *ADB) ProxyUpdate(p Proxy) {
 	_, err := a.
 		db.
