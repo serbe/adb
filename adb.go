@@ -14,7 +14,7 @@ type ADB struct {
 	db *pg.DB
 }
 
-// InitDB - initialise database connection
+// InitDB - initializing the connection to the database
 func InitDB(database, addr, user, password string) *ADB {
 	a := new(ADB)
 	db := pg.Connect(&pg.Options{
