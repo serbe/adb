@@ -15,48 +15,45 @@ type Link struct {
 }
 
 // LinksGetAll - get all links
-func (a *ADB) LinksGetAll() []Link {
+func (a *ADB) LinksGetAll() ([]Link, error) {
 	var links []Link
 	err := a.
 		db.
 		Model(&links).
 		Select()
-	chkErr("LinksGetAll select", err)
-	return links
+	return links, err
 }
 
 // LinksGetAllIterate - get all iterate links
-func (a *ADB) LinksGetAllIterate() []Link {
+func (a *ADB) LinksGetAllIterate() ([]Link, error) {
 	var links []Link
 	err := a.
 		db.
 		Model(&links).
 		Where("iterate = true").
 		Select()
-	chkErr("LinksGetAllIterate select", err)
-	return links
+	return links, err
 }
 
 // LinksGetAllOld - get all old links
-func (a *ADB) LinksGetAllOld() []Link {
+func (a *ADB) LinksGetAllOld() ([]Link, error) {
 	var links []Link
 	err := a.
 		db.
 		Model(&links).
 		Where("iterate = true AND update_at < NOW() - (INTERVAL '1 hours')").
 		Select()
-	chkErr("LinksGetAllOld select", err)
-	return links
+	return links, err
 }
 
 // LinkInsert - insert new link
-func (a *ADB) LinkInsert(l Link) {
+func (a *ADB) LinkInsert(l Link) error {
 	_, err := a.db.Model(&l).Insert(&l)
-	chkErr("LinkInsert", err)
+	return err
 }
 
 // LinkUpdate - update existing link
-func (a *ADB) LinkUpdate(l Link) {
+func (a *ADB) LinkUpdate(l Link) error {
 	_, err := a.db.Model(&l).Where("hostname = ?", l.Hostname).Update(&l)
-	chkErr("LinkUpdate", err)
+	return err
 }

@@ -21,100 +21,92 @@ type Proxy struct {
 }
 
 // ProxyGetAll - get all proxies
-func (a *ADB) ProxyGetAll() []Proxy {
+func (a *ADB) ProxyGetAll() ([]Proxy, error) {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Select()
-	chkErr("ProxyGetAll Select", err)
-	return proxies
+	return proxies, err
 }
 
 // ProxyGetAllScheme - get all proxies by scheme
-func (a *ADB) ProxyGetAllScheme(v string) []Proxy {
+func (a *ADB) ProxyGetAllScheme(v string) ([]Proxy, error) {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Where("scheme = ?", v).
 		Select()
-	chkErr("ProxyGetAll Select", err)
-	return proxies
+	return proxies, err
 }
 
 // ProxyGetAllOld - get all old proxies
-func (a *ADB) ProxyGetAllOld() []Proxy {
+func (a *ADB) ProxyGetAllOld() ([]Proxy, error) {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Where("work = true OR update_at < NOW() - (INTERVAL '3 days') * checks").
 		Select()
-	chkErr("ProxyGetAllOld Select", err)
-	return proxies
+	return proxies, err
 }
 
 // ProxyGetAllWorking - get all working proxies
-func (a *ADB) ProxyGetAllWorking() []Proxy {
+func (a *ADB) ProxyGetAllWorking() ([]Proxy, error) {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Where("work = true").
 		Select()
-	chkErr("ProxyGetAllWorking Select", err)
-	return proxies
+	return proxies, err
 }
 
 // ProxyGetAllWorkingScheme - get all working proxies by scheme
-func (a *ADB) ProxyGetAllWorkingScheme(v string) []Proxy {
+func (a *ADB) ProxyGetAllWorkingScheme(v string) ([]Proxy, error) {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Where("work = true ANS scheme = ?", v).
 		Select()
-	chkErr("ProxyGetAllWorking Select", err)
-	return proxies
+	return proxies, err
 }
 
-// ProxyGetAllAnonymous - get all anonimous proxies
-func (a *ADB) ProxyGetAllAnonymous() []Proxy {
+// ProxyGetAllAnonymous - get all anonymous proxies
+func (a *ADB) ProxyGetAllAnonymous() ([]Proxy, error) {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Where("anon = true").
 		Select()
-	chkErr("ProxyGetAllAnonymous Select", err)
-	return proxies
+	return proxies, err
 }
 
-// ProxyGetAllAnonymousScheme - get all anonimous proxies by scheme
-func (a *ADB) ProxyGetAllAnonymousScheme(v string) []Proxy {
+// ProxyGetAllAnonymousScheme - get all anonymous proxies by scheme
+func (a *ADB) ProxyGetAllAnonymousScheme(v string) ([]Proxy, error) {
 	var proxies []Proxy
 	err := a.
 		db.
 		Model(&proxies).
 		Where("anon = true AND scheme = ?", v).
 		Select()
-	chkErr("ProxyGetAllAnonymous Select", err)
-	return proxies
+	return proxies, err
 }
 
 // ProxyGetUniqueHosts - gel all unique hosts
-func (a *ADB) ProxyGetUniqueHosts() []string {
+func (a *ADB) ProxyGetUniqueHosts() ([]string, error) {
 	var hosts []string
 	_, err := a.
 		db.
 		Query(&hosts, "SELECT DISTINCT host FROM proxies")
-	chkErr("ProxyGetUniqueHosts Query", err)
-	return hosts
+	return hosts, err
 }
 
 // ProxyGetFrequentlyUsedPorts - get 10 frequently used ports
-func (a *ADB) ProxyGetFrequentlyUsedPorts() []string {
+func (a *ADB) ProxyGetFrequentlyUsedPorts() ([]string, error) {
 	var ports []string
 	_, err := a.
 		db.
@@ -129,25 +121,24 @@ func (a *ADB) ProxyGetFrequentlyUsedPorts() []string {
 				count(port) DESC
 			LIMIT 10
 		`)
-	chkErr("ProxyGetFrequentlyUsedPorts Query", err)
-	return ports
+	return ports, err
 }
 
 // ProxyInsert - insert new proxy
-func (a *ADB) ProxyInsert(p Proxy) {
+func (a *ADB) ProxyInsert(p Proxy) error {
 	_, err := a.
 		db.
 		Model(&p).
 		Insert(&p)
-	chkErr("ProxyInsert", err)
+	return err
 }
 
 // ProxyUpdate - update existing proxy
-func (a *ADB) ProxyUpdate(p Proxy) {
+func (a *ADB) ProxyUpdate(p Proxy) error {
 	_, err := a.
 		db.
 		Model(&p).
 		Where("hostname = ?", p.Hostname).
 		Update(&p)
-	chkErr("ProxyUpdate", err)
+	return err
 }
