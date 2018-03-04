@@ -30,6 +30,49 @@ func (a *ADB) ProxyGetAll() ([]Proxy, error) {
 	return proxies, err
 }
 
+// ProxyGetByID - get proxy by id
+func (a *ADB) ProxyGetByID(id int64) (Proxy, error) {
+	var proxy Proxy
+	err := a.
+		db.
+		Model(&proxy).
+		Where("id = ?", id).
+		Select()
+	return proxy, err
+}
+
+// ProxyGetAllCount - get count of proxy
+func (a *ADB) ProxyGetAllCount() int64 {
+	var proxies []Proxy
+	c, _ := a.
+		db.
+		Model(&proxies).
+		Count()
+	return int64(c)
+}
+
+// ProxyGetAllWorkCount - get count of working proxy
+func (a *ADB) ProxyGetAllWorkCount() int64 {
+	var proxies []Proxy
+	c, _ := a.
+		db.
+		Model(&proxies).
+		Where("work = TRUE").
+		Count()
+	return int64(c)
+}
+
+// ProxyGetAllAnonymousCount - get count of anonimous proxy
+func (a *ADB) ProxyGetAllAnonymousCount() int64 {
+	var proxies []Proxy
+	c, _ := a.
+		db.
+		Model(&proxies).
+		Where("work = TRUE AND anon = TRUE").
+		Count()
+	return int64(c)
+}
+
 // ProxyGetAllScheme - get all proxies by scheme
 func (a *ADB) ProxyGetAllScheme(v string) ([]Proxy, error) {
 	var proxies []Proxy
