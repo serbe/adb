@@ -47,13 +47,20 @@ func (a *ADB) LinksGetAllOld() ([]Link, error) {
 }
 
 // LinkInsert - insert new link
-func (a *ADB) LinkInsert(l Link) error {
-	_, err := a.db.Model(&l).Insert(&l)
+func (a *ADB) LinkInsert(l *Link) error {
+	_, err := a.
+		db.
+		Model(l).
+		Insert(l)
 	return err
 }
 
 // LinkUpdate - update existing link
-func (a *ADB) LinkUpdate(l Link) error {
-	_, err := a.db.Model(&l).Where("hostname = ?", l.Hostname).Update(&l)
+func (a *ADB) LinkUpdate(l *Link) error {
+	_, err := a.
+		db.
+		Model(l).
+		Where("hostname = ?", l.Hostname).
+		Update(l)
 	return err
 }

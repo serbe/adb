@@ -125,20 +125,20 @@ func (a *ADB) ProxyGetFrequentlyUsedPorts() ([]string, error) {
 }
 
 // ProxyInsert - insert new proxy
-func (a *ADB) ProxyInsert(p Proxy) error {
+func (a *ADB) ProxyInsert(p *Proxy) error {
 	_, err := a.
 		db.
-		Model(&p).
-		Insert(&p)
+		Model(p).
+		Insert(p)
 	return err
 }
 
 // ProxyUpdate - update existing proxy
-func (a *ADB) ProxyUpdate(p Proxy) error {
+func (a *ADB) ProxyUpdate(p *Proxy) error {
 	_, err := a.
 		db.
-		Model(&p).
+		Model(p).
 		Where("hostname = ?", p.Hostname).
-		Update(&p)
+		Update(p)
 	return err
 }
