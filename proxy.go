@@ -148,7 +148,7 @@ func (a *ADB) ProxyGetUniqueHosts() ([]string, error) {
 	return hosts, err
 }
 
-// ProxyGetFrequentlyUsedPorts - get 10 frequently used ports
+// ProxyGetFrequentlyUsedPorts - get 20 frequently used ports
 func (a *ADB) ProxyGetFrequentlyUsedPorts() ([]string, error) {
 	var ports []string
 	_, err := a.
@@ -162,7 +162,7 @@ func (a *ADB) ProxyGetFrequentlyUsedPorts() ([]string, error) {
 				port
 			ORDER BY
 				count(port) DESC
-			LIMIT 10
+			LIMIT 20
 		`)
 	return ports, err
 }
@@ -184,4 +184,44 @@ func (a *ADB) ProxyUpdate(p *Proxy) error {
 		Where("hostname = ?", p.Hostname).
 		Update(p)
 	return err
+}
+
+// ProxyGetRandomWorking - get n random working proxies
+func (a *ADB) ProxyGetRandomWorking(n int) ([]string, error) {
+	var proxies []string
+	_, err := a.
+		db.
+		Query(&proxies, `
+			SELECT
+				hostname
+			FROM
+				proxies
+			WHERE
+				work = true
+			ORDER BY
+				random()
+			LIMIT
+				?
+		`, n)
+	return proxies, err
+}
+
+// ProxyGetRandomAnonymous - get n random anonymous proxies
+func (a *ADB) ProxyGetRandomAnonymous(n int) ([]string, error) {
+	var proxies []string
+	_, err := a.
+		db.
+		Query(&proxies, `
+			SELECT
+				hostname
+			FROM
+				proxies
+			WHERE
+				work = true AND anon = true
+			ORDER BY
+				random()
+			LIMIT
+				?
+		`, n)
+	return proxies, err
 }
