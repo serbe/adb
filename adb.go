@@ -2,7 +2,6 @@ package adb
 
 import (
 	"log"
-	"os"
 
 	"github.com/go-pg/pg"
 )
@@ -23,8 +22,7 @@ func InitDB(database, addr, user, password string) *ADB {
 	})
 	_, err := db.Exec("SELECT NULL LIMIT 0")
 	if err != nil {
-		log.Println("InitDB error: ", err)
-		os.Exit(1)
+		log.Fatal("InitDB error: ", err)
 	}
 	a.db = db
 	return a
