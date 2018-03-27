@@ -62,7 +62,7 @@ func (a *ADB) ProxyGetAllWorkCount() int64 {
 	return int64(c)
 }
 
-// ProxyGetAllAnonymousCount - get count of anonimous proxy
+// ProxyGetAllAnonymousCount - get count of anonymous proxy
 func (a *ADB) ProxyGetAllAnonymousCount() int64 {
 	var proxies []Proxy
 	c, _ := a.
