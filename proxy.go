@@ -95,6 +95,28 @@ func (a *ADB) ProxyGetAllOldCount() int64 {
 	return int64(c)
 }
 
+// ProxyGetAllWorkingSchemeCount - get count of working proxies by scheme
+func (a *ADB) ProxyGetAllWorkingSchemeCount(v string) int64 {
+	var proxies []Proxy
+	c, _ := a.
+		db.
+		Model(&proxies).
+		Where("work = true ANS scheme = ?", v).
+		Count()
+	return int64(c)
+}
+
+// ProxyGetAllAnonymousSchemeCount - get count of anonymous proxies by scheme
+func (a *ADB) ProxyGetAllAnonymousSchemeCount(v string) int64 {
+	var proxies []Proxy
+	c, _ := a.
+		db.
+		Model(&proxies).
+		Where("anon = true AND scheme = ?", v).
+		Count()
+	return int64(c)
+}
+
 // ProxyGetAllScheme - get all proxies by scheme
 func (a *ADB) ProxyGetAllScheme(v string) ([]Proxy, error) {
 	var proxies []Proxy
