@@ -2,7 +2,6 @@ package adb
 
 import (
 	"errors"
-	"strings"
 	"time"
 )
 
@@ -274,27 +273,47 @@ func (a *ADB) ProxyGetRandomAnonymous(n int) ([]string, error) {
 
 // CheckNotExists - check list of hostnames with not exist in base
 func (a *ADB) CheckNotExists(s []string) ([]string, error) {
-	var proxies []string
+	var (
+		proxies []string
+		err     error
+		j       int64
+	)
 	if len(s) == 0 {
 		return proxies, errors.New("Empty input")
 	}
-	var values = "(values ('" + strings.Join(s, "'), ('") + "'))"
-	_, err := a.
-		db.
-		Query(&proxies, `
-			SELECT
-				*
-			FROM
-				?
-			AS
-				s (hostname)
-			WHERE
-				hostname NOT IN (
-					SELECT
-						hostname
-					FROM
-						proxies
-				)
-		`, values)
+	var mapS = make(map[string]bool)
+	for i := range s {
+		mapS[s[i]] = true
+	}
+	count := a.ProxyGetAllCount()
+	for j = 0; j < count; {
+		var pr []string
+		var r int64 = 100000
+		if j+100000 > count {
+			r = count % 100000
+		}
+		_, err = a.
+			db.
+			Query(&pr, `
+				SELECT
+					hostname
+				FROM
+					proxies
+				OFFSET
+					?
+				LIMIT
+					?
+			`, j, j+r)
+		for i := range pr {
+			_, ok := mapS[pr[i]]
+			if ok {
+				mapS[pr[i]] = false
+			}
+		}
+		j = j + r
+	}
+	for k := range mapS {
+		proxies = append(proxies, k)
+	}
 	return proxies, err
 }
