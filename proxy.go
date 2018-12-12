@@ -1,6 +1,8 @@
 package adb
 
 import (
+	"errors"
+	"strings"
 	"time"
 )
 
@@ -84,7 +86,7 @@ func (a *ADB) ProxyGetAllSchemeCount(v string) int64 {
 	return int64(c)
 }
 
-// ProxyGetAllOld - get all old proxies
+// ProxyGetAllOldCount - get count of all old proxies
 func (a *ADB) ProxyGetAllOldCount() int64 {
 	var proxies []Proxy
 	c, _ := a.
@@ -267,5 +269,32 @@ func (a *ADB) ProxyGetRandomAnonymous(n int) ([]string, error) {
 			LIMIT
 				?
 		`, n)
+	return proxies, err
+}
+
+// CheckNotExists - check list of hostnames with not exist in base
+func (a *ADB) CheckNotExists(s []string) ([]string, error) {
+	var proxies []string
+	if len(s) == 0 {
+		return proxies, errors.New("Empty input")
+	}
+	var values = "(values ('" + strings.Join(s, "'), ('") + "'))"
+	_, err := a.
+		db.
+		Query(&proxies, `
+			SELECT
+				*
+			FROM
+				?
+			AS
+				s (hostname)
+			WHERE
+				hostname NOT IN (
+					SELECT
+						hostname
+					FROM
+						proxies
+				)
+		`, values)
 	return proxies, err
 }
