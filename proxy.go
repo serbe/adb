@@ -286,12 +286,8 @@ func (a *ADB) CheckNotExists(s []string) ([]string, error) {
 		mapS[s[i]] = true
 	}
 	count := a.ProxyGetAllCount()
-	for j = 0; j < count; {
+	for j = 0; j < count/100000+1; j++ {
 		var pr []string
-		var r int64 = 100000
-		if j+100000 > count {
-			r = count % 100000
-		}
 		_, err = a.
 			db.
 			Query(&pr, `
@@ -299,23 +295,19 @@ func (a *ADB) CheckNotExists(s []string) ([]string, error) {
 					hostname
 				FROM
 					proxies
+				ORDER BY
+					id
 				OFFSET
 					?
 				LIMIT
-					?
-			`, j, j+r)
+					100000
+			`, j*100000)
 		for i := range pr {
-			_, ok := mapS[pr[i]]
-			if ok {
-				mapS[pr[i]] = false
-			}
+			delete(mapS, pr[i])
 		}
-		j = j + r
 	}
 	for k := range mapS {
-		if mapS[k] == true {
-			proxies = append(proxies, k)
-		}
+		proxies = append(proxies, k)
 	}
 	return proxies, err
 }
