@@ -313,7 +313,9 @@ func (a *ADB) CheckNotExists(s []string) ([]string, error) {
 		j = j + r
 	}
 	for k := range mapS {
-		proxies = append(proxies, k)
+		if mapS[k] == true {
+			proxies = append(proxies, k)
+		}
 	}
 	return proxies, err
 }
