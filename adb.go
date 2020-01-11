@@ -1,29 +1,34 @@
 package adb
 
 import (
+	"context"
 	"log"
+	"os"
 
-	"github.com/go-pg/pg"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-// ADB - structure for interacting with the database
-type ADB struct {
-	db *pg.DB
-}
+var (
+	logErrors bool
+	pool      *pgxpool.Pool
+)
 
 // InitDB - initializing the connection to the database
-func InitDB(database, addr, user, password string) *ADB {
-	a := new(ADB)
-	db := pg.Connect(&pg.Options{
-		Database: database,
-		Addr:     addr,
-		User:     user,
-		Password: password,
-	})
-	_, err := db.Exec("SELECT NULL LIMIT 0")
+func InitDB(dbURL string) {
+	var err error
+	pool, err = pgxpool.Connect(context.Background(), dbURL)
+	if err != nil {
+		log.Printf("Unable to connection to database: %v\n", err)
+		os.Exit(1)
+	}
+	_, err = pool.Exec(context.Background(), "SELECT NULL LIMIT 0")
 	if err != nil {
 		log.Fatal("InitDB error: ", err)
 	}
-	a.db = db
-	return a
+}
+
+func errmsg(str string, err error) {
+	if logErrors {
+		log.Println("Error in", str, err)
+	}
 }
