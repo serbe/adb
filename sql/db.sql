@@ -12,7 +12,7 @@ CREATE TABLE proxies
   hostname text NOT NULL,
   scheme text NOT NULL DEFAULT 'http'::text,
   host text NOT NULL DEFAULT ''::text,
-  port text NOT NULL DEFAULT ''::text,
+  port bigint NOT NULL DEFAULT 0,
   work boolean NOT NULL DEFAULT false,
   anon boolean NOT NULL DEFAULT false,
   response bigint NOT NULL DEFAULT 0,

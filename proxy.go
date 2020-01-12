@@ -12,7 +12,7 @@ type Proxy struct {
 	Scheme   string        `sql:"scheme,notnull"      json:"-"`
 	Hostname string        `sql:"hostname,pk,notnull" json:"hostname"`
 	Host     string        `sql:"host,notnull"        json:"-"`
-	Port     int           `sql:"port,notnull"        json:"-"`
+	Port     int64         `sql:"port,notnull"        json:"-"`
 	IsWork   bool          `sql:"work,notnull"        json:"-"`
 	IsAnon   bool          `sql:"anon,notnull"        json:"-"`
 	Response time.Duration `sql:"response,notnull"    json:"-"`
