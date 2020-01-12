@@ -12,7 +12,7 @@ type Proxy struct {
 	Scheme   string        `sql:"scheme,notnull"      json:"-"`
 	Hostname string        `sql:"hostname,pk,notnull" json:"hostname"`
 	Host     string        `sql:"host,notnull"        json:"-"`
-	Port     int64         `sql:"port,notnull"        json:"-"`
+	Port     int           `sql:"port,notnull"        json:"-"`
 	IsWork   bool          `sql:"work,notnull"        json:"-"`
 	IsAnon   bool          `sql:"anon,notnull"        json:"-"`
 	Response time.Duration `sql:"response,notnull"    json:"-"`
@@ -387,8 +387,8 @@ func (db *DB) GetUniqueHosts() ([]string, error) {
 }
 
 // GetFrequentlyUsedPorts - get 20 frequently used ports
-func (db *DB) GetFrequentlyUsedPorts() ([]int64, error) {
-	var ports []int64
+func (db *DB) GetFrequentlyUsedPorts() ([]int, error) {
+	var ports []int
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			port
@@ -405,7 +405,7 @@ func (db *DB) GetFrequentlyUsedPorts() ([]int64, error) {
 		return ports, err
 	}
 	for rows.Next() {
-		var port int64
+		var port int
 		err := rows.Scan(&port)
 		if err != nil {
 			errmsg("GetFrequentlyUsedPorts Scan", err)
