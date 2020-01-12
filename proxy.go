@@ -2,21 +2,23 @@ package adb
 
 import (
 	"context"
+	"errors"
 	"time"
 )
 
 // Proxy - proxy unit
 type Proxy struct {
-	IsWork   bool          `sql:"work,notnull"        json:"-"`
-	IsAnon   bool          `sql:"anon,notnull"        json:"-"`
-	Checks   int           `sql:"checks,notnull"      json:"-"`
+	ID       int64         `sql:"id,pk,notnull"       json:"-"`
+	Scheme   string        `sql:"scheme,notnull"      json:"-"`
 	Hostname string        `sql:"hostname,pk,notnull" json:"hostname"`
 	Host     string        `sql:"host,notnull"        json:"-"`
 	Port     int           `sql:"port,notnull"        json:"-"`
-	Scheme   string        `sql:"scheme,notnull"      json:"-"`
+	IsWork   bool          `sql:"work,notnull"        json:"-"`
+	IsAnon   bool          `sql:"anon,notnull"        json:"-"`
+	Response time.Duration `sql:"response,notnull"    json:"-"`
+	Checks   int           `sql:"checks,notnull"      json:"-"`
 	CreateAt time.Time     `sql:"create_at,notnull"   json:"-"`
 	UpdateAt time.Time     `sql:"update_at,notnull"   json:"-"`
-	Response time.Duration `sql:"response,notnull"    json:"-"`
 }
 
 // GetAll - get all proxies
@@ -24,16 +26,17 @@ func (db *DB) GetAll() ([]Proxy, error) {
 	var proxies []Proxy
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
-			work,
-			anon,
-			checks,
+			id
 			hostname,
+			scheme,
 			host,
 			port,
-			scheme,
+			work,
+			anon,
+			response,
+			checks,
 			create_at,
-			update_at,
-			response
+			update_at
 		FROM
 			proxies
 	`)
@@ -43,9 +46,9 @@ func (db *DB) GetAll() ([]Proxy, error) {
 	}
 	for rows.Next() {
 		var proxy Proxy
-		err := rows.Scan(&proxy.IsWork, &proxy.IsAnon, &proxy.Checks, &proxy.Hostname,
-			&proxy.Host, &proxy.Port, &proxy.Scheme, &proxy.CreateAt, &proxy.UpdateAt,
-			&proxy.Response)
+		err := rows.Scan(&proxy.ID, &proxy.Hostname, &proxy.Scheme, &proxy.Host, &proxy.Port,
+			&proxy.IsWork, &proxy.IsAnon, &proxy.Response, &proxy.Checks, &proxy.CreateAt,
+			&proxy.UpdateAt)
 		if err != nil {
 			errmsg("GetProxyAll Scan", err)
 			return proxies, err
@@ -418,20 +421,20 @@ func (db *DB) Insert(p *Proxy) error {
 	_, err := db.Pool.Exec(context.Background(), `
 		INSERT INTO
 			proxies (
-				work,
-				anon,
-				checks,
 				hostname,
+				scheme,
 				host,
 				port,
-				scheme,
+				work,
+				anon,
+				response,
+				checks,
 				create_at,
-				update_at,
-				response
+				update_at
 			)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-	`, p.IsWork, p.IsAnon, p.Checks, p.Hostname, p.Host, p.Port, p.Scheme, p.CreateAt, p.UpdateAt, p.Response)
+	`, p.Hostname, p.Scheme, p.Host, p.Port, p.IsWork, p.IsAnon, p.Response, p.Checks, p.CreateAt, p.UpdateAt)
 	return err
 }
 
@@ -441,18 +444,17 @@ func (db *DB) Update(p *Proxy) error {
 		UPDATE
 			proxies
 		SET
-			work = $2,
-			anon = $3,
-			checks = $4,
-			host = $5,
-			port = $6,
-			scheme = $7,
-			create_at = $8,
-			update_at = $9,
-			response = &10
+			scheme = $2,
+			host = $3,
+			port = $4,
+			work = $5,
+			anon = $6,
+			response = $7,
+			checks = $8,
+			update_at = $9
 		WHERE
 			hostname = $1
-	`, p.Hostname, p.IsWork, p.IsAnon, p.Checks, p.Host, p.Port, p.Scheme, p.CreateAt, p.UpdateAt, p.Response)
+	`, p.Hostname, p.Scheme, p.Host, p.Port, p.IsWork, p.IsAnon, p.Response, p.Checks, p.UpdateAt)
 	return err
 }
 
@@ -487,63 +489,81 @@ func (db *DB) GetRandomWorking(n int) ([]string, error) {
 	return proxies, rows.Err()
 }
 
-// // ProxyGetRandomAnonymous - get n random anonymous proxies
-// func (a *ADB) ProxyGetRandomAnonymous(n int) ([]string, error) {
-// 	var proxies []string
-// 	_, err := a.
-// 		db.
-// 		Query(&proxies, `
-// 			SELECT
-// 				hostname
-// 			FROM
-// 				proxies
-// 			WHERE
-// 				work = true AND anon = true
-// 			ORDER BY
-// 				random()
-// 			LIMIT
-// 				?
-// 		`, n)
-// 	return proxies, err
-// }
+// GetRandomAnonymous - get n random anonymous proxies
+func (db *DB) GetRandomAnonymous(n int) ([]string, error) {
+	var proxies []string
+	rows, err := db.Pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			work = true AND anon = true
+		ORDER BY
+			random()
+		LIMIT
+			$1
+	`, n)
+	if err != nil {
+		errmsg("GetRandomAnonymous Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetRandomAnonymous Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
-// // CheckNotExists - check list of hostnames with not exist in base
-// func (a *ADB) CheckNotExists(s []string) ([]string, error) {
-// 	var (
-// 		proxies []string
-// 		err     error
-// 		j       int64
-// 	)
-// 	if len(s) == 0 {
-// 		return proxies, errors.New("Empty input")
-// 	}
-// 	var mapS = make(map[string]bool)
-// 	for i := range s {
-// 		mapS[s[i]] = true
-// 	}
-// 	count := a.ProxyGetAllCount()
-// 	for j = 0; j < count/100000+1; j++ {
-// 		var pr []string
-// 		_, err = a.
-// 			db.
-// 			Query(&pr, `
-// 				SELECT
-// 					hostname
-// 				FROM
-// 					proxies
-// 				ORDER BY
-// 					id
-// 				OFFSET
-// 					?
-// 				LIMIT
-// 					100000
-// 			`, j*100000)
-// 		for i := range pr {
-// 			delete(mapS, pr[i])
-// 		}
-// 	}
-// 	for k := range mapS {
-// 		proxies = append(proxies, k)
-// 	}
-// 	return proxies, err
-// }
+// CheckNotExists - check list of hostnames with not exist in base
+func (db *DB) CheckNotExists(s []string) ([]string, error) {
+	var (
+		proxies []string
+		err     error
+		j       int64
+	)
+	if len(s) == 0 {
+		return proxies, errors.New("Empty input")
+	}
+	var mapS = make(map[string]bool)
+	for i := range s {
+		mapS[s[i]] = true
+	}
+	count := db.GetCountAll()
+	for j = 0; j < count/100000+1; j++ {
+		rows, err := db.Pool.Query(context.Background(), `
+			SELECT
+				hostname
+			FROM
+				proxies
+			ORDER BY
+				id
+			OFFSET
+				?
+			LIMIT
+				100000
+		`, j*100000)
+		if err != nil {
+			errmsg("CheckNotExists Query", err)
+			continue
+		}
+		for rows.Next() {
+			var proxy string
+			err := rows.Scan(&proxy)
+			if err != nil {
+				errmsg("CheckNotExists Scan", err)
+				return proxies, err
+			}
+			delete(mapS, proxy)
+		}
+	}
+	for k := range mapS {
+		proxies = append(proxies, k)
+	}
+	return proxies, err
+}
