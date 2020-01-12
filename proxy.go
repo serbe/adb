@@ -206,127 +206,271 @@ func GetAllAnonymousSchemeCount(scheme string) int64 {
 // 	return proxies, err
 // }
 
-// // ProxyGetAllOld - get all old proxies
-// func (a *ADB) ProxyGetAllOld() ([]Proxy, error) {
-// 	var proxies []Proxy
-// 	err := a.
-// 		db.
-// 		Model(&proxies).
-// 		Where("work = true OR update_at < NOW() - (INTERVAL '3 days') * checks").
-// 		Select()
-// 	return proxies, err
-// }
+// GetAllOld - get all old proxies
+func GetAllOld() ([]string, error) {
+	var proxies []string
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			work = true OR update_at < NOW() - (INTERVAL '3 days') * checks
+	`)
+	if err != nil {
+		errmsg("GetAllOld Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetAllOld Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
-// // ProxyGetAllWorking - get all working proxies
-// func (a *ADB) ProxyGetAllWorking() ([]Proxy, error) {
-// 	var proxies []Proxy
-// 	err := a.
-// 		db.
-// 		Model(&proxies).
-// 		Where("work = true").
-// 		Select()
-// 	return proxies, err
-// }
+// GetAllWorking - get all working proxies
+func GetAllWorking() ([]string, error) {
+	var proxies []string
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			work = true
+	`)
+	if err != nil {
+		errmsg("GetAllWorking Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetAllWorking Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
-// // ProxyGetAllWorkingScheme - get all working proxies by scheme
-// func (a *ADB) ProxyGetAllWorkingScheme(v string) ([]Proxy, error) {
-// 	var proxies []Proxy
-// 	err := a.
-// 		db.
-// 		Model(&proxies).
-// 		Where("work = true ANS scheme = ?", v).
-// 		Select()
-// 	return proxies, err
-// }
+// GetAllWorkingScheme - get all working proxies by scheme
+func GetAllWorkingScheme(scheme string) ([]string, error) {
+	var proxies []string
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			work = true ANS scheme = $1
+	`, scheme)
+	if err != nil {
+		errmsg("GetAllWorkingScheme Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetAllWorkingScheme Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
-// // ProxyGetAllAnonymous - get all anonymous proxies
-// func (a *ADB) ProxyGetAllAnonymous() ([]Proxy, error) {
-// 	var proxies []Proxy
-// 	err := a.
-// 		db.
-// 		Model(&proxies).
-// 		Where("anon = true").
-// 		Select()
-// 	return proxies, err
-// }
+// GetAllAnonymous - get all anonymous proxies
+func GetAllAnonymous() ([]string, error) {
+	var proxies []string
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			anon = true
+	`)
+	if err != nil {
+		errmsg("GetAllAnonymous Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetAllAnonymous Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
-// // ProxyGetAllAnonymousScheme - get all anonymous proxies by scheme
-// func (a *ADB) ProxyGetAllAnonymousScheme(v string) ([]Proxy, error) {
-// 	var proxies []Proxy
-// 	err := a.
-// 		db.
-// 		Model(&proxies).
-// 		Where("anon = true AND scheme = ?", v).
-// 		Select()
-// 	return proxies, err
-// }
+// GetAllAnonymousScheme - get all anonymous proxies by scheme
+func GetAllAnonymousScheme(scheme string) ([]string, error) {
+	var proxies []string
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			anon = true AND scheme = $1
+	`, scheme)
+	if err != nil {
+		errmsg("GetAllAnonymousScheme Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetAllAnonymousScheme Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
-// // ProxyGetUniqueHosts - gel all unique hosts
-// func (a *ADB) ProxyGetUniqueHosts() ([]string, error) {
-// 	var hosts []string
-// 	_, err := a.
-// 		db.
-// 		Query(&hosts, "SELECT DISTINCT host FROM proxies")
-// 	return hosts, err
-// }
+// GetUniqueHosts - gel all unique proxy
+func GetUniqueHosts() ([]string, error) {
+	var hosts []string
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			DISTINCT host
+		FROM
+			proxies
+		WHERE
+			work = true
+	`)
+	if err != nil {
+		errmsg("GetUniqueHosts Query", err)
+		return hosts, err
+	}
+	for rows.Next() {
+		var host string
+		err := rows.Scan(&host)
+		if err != nil {
+			errmsg("GetUniqueHosts Scan", err)
+			return hosts, err
+		}
+		hosts = append(hosts, host)
+	}
+	return hosts, rows.Err()
+}
 
-// // ProxyGetFrequentlyUsedPorts - get 20 frequently used ports
-// func (a *ADB) ProxyGetFrequentlyUsedPorts() ([]string, error) {
-// 	var ports []string
-// 	_, err := a.
-// 		db.
-// 		Query(&ports, `
-// 			SELECT
-// 				port
-// 			FROM
-// 				proxies
-// 			GROUP BY
-// 				port
-// 			ORDER BY
-// 				count(port) DESC
-// 			LIMIT 20
-// 		`)
-// 	return ports, err
-// }
+// GetFrequentlyUsedPorts - get 20 frequently used ports
+func GetFrequentlyUsedPorts() ([]int64, error) {
+	var ports []int64
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			port
+		FROM
+			proxies
+		GROUP BY
+			port
+		ORDER BY
+			count(port) DESC
+		LIMIT 20
+	`)
+	if err != nil {
+		errmsg("GetFrequentlyUsedPorts Query", err)
+		return ports, err
+	}
+	for rows.Next() {
+		var port int64
+		err := rows.Scan(&port)
+		if err != nil {
+			errmsg("GetFrequentlyUsedPorts Scan", err)
+			return ports, err
+		}
+		ports = append(ports, port)
+	}
+	return ports, rows.Err()
+}
 
-// // ProxyInsert - insert new proxy
-// func (a *ADB) ProxyInsert(p *Proxy) error {
-// 	_, err := a.
-// 		db.
-// 		Model(p).
-// 		Insert(p)
-// 	return err
-// }
+// Insert - insert new proxy
+func Insert(p *Proxy) error {
+	_, err := pool.Exec(context.Background(), `
+		INSERT INTO
+			proxies (
+				work,
+				anon,
+				checks,
+				hostname,
+				host,
+				port,
+				scheme,
+				create_at,
+				update_at,
+				response
+			)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+	`, p.IsWork, p.IsAnon, p.Checks, p.Hostname, p.Host, p.Port, p.Scheme, p.CreateAt, p.UpdateAt, p.Response)
+	return err
+}
 
-// // ProxyUpdate - update existing proxy
-// func (a *ADB) ProxyUpdate(p *Proxy) error {
-// 	_, err := a.
-// 		db.
-// 		Model(p).
-// 		Where("hostname = ?", p.Hostname).
-// 		Update(p)
-// 	return err
-// }
+// Update - update existing proxy
+func Update(p *Proxy) error {
+	_, err := pool.Exec(context.Background(), `
+		UPDATE
+			proxies
+		SET
+			work = $2,
+			anon = $3,
+			checks = $4,
+			host = $5,
+			port = $6,
+			scheme = $7,
+			create_at = $8,
+			update_at = $9,
+			response = &10
+		WHERE
+			hostname = $1
+	`, p.Hostname, p.IsWork, p.IsAnon, p.Checks, p.Host, p.Port, p.Scheme, p.CreateAt, p.UpdateAt, p.Response)
+	return err
+}
 
-// // ProxyGetRandomWorking - get n random working proxies
-// func (a *ADB) ProxyGetRandomWorking(n int) ([]string, error) {
-// 	var proxies []string
-// 	_, err := a.
-// 		db.
-// 		Query(&proxies, `
-// 			SELECT
-// 				hostname
-// 			FROM
-// 				proxies
-// 			WHERE
-// 				work = true
-// 			ORDER BY
-// 				random()
-// 			LIMIT
-// 				?
-// 		`, n)
-// 	return proxies, err
-// }
+// GetRandomWorking - get n random working proxies
+func GetRandomWorking(n int) ([]string, error) {
+	var proxies []string
+	rows, err := pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			work = true
+		ORDER BY
+			random()
+		LIMIT
+			$1
+	`, n)
+	if err != nil {
+		errmsg("GetRandomWorking Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetRandomWorking Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
 // // ProxyGetRandomAnonymous - get n random anonymous proxies
 // func (a *ADB) ProxyGetRandomAnonymous(n int) ([]string, error) {
