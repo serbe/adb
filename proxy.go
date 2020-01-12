@@ -22,64 +22,29 @@ type Proxy struct {
 }
 
 // GetAll - get all proxies
-func (db *DB) GetAll() ([]Proxy, error) {
-	var proxies []Proxy
+func (db *DB) GetAll() ([]string, error) {
+	var proxies []string
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
-			id
-			hostname,
-			scheme,
-			host,
-			port,
-			work,
-			anon,
-			response,
-			checks,
-			create_at,
-			update_at
+			hostname
 		FROM
 			proxies
 	`)
 	if err != nil {
-		errmsg("GetProxyAll Query", err)
+		errmsg("GetAll Query", err)
 		return proxies, err
 	}
 	for rows.Next() {
-		var proxy Proxy
-		err := rows.Scan(&proxy.ID, &proxy.Hostname, &proxy.Scheme, &proxy.Host, &proxy.Port,
-			&proxy.IsWork, &proxy.IsAnon, &proxy.Response, &proxy.Checks, &proxy.CreateAt,
-			&proxy.UpdateAt)
+		var proxy string
+		err := rows.Scan(&proxy)
 		if err != nil {
-			errmsg("GetProxyAll Scan", err)
+			errmsg("GetAll Scan", err)
 			return proxies, err
 		}
 		proxies = append(proxies, proxy)
 	}
 	return proxies, rows.Err()
 }
-
-// // ProxyGetByID - get proxy by id
-// func (db *DB) GetByID(id int64) (Proxy, error) {
-// 	var proxy Proxy
-// 	err := db.Pool.QueryRow(context.Background(), `
-// 		SELECT
-// 			work,
-// 			anon,
-// 			checks,
-// 			hostname,
-// 			host,
-// 			port,
-// 			scheme,
-// 			create_at,
-// 			update_at,
-// 			response
-// 		FROM
-// 			proxies
-// 		WHERE
-
-// 	`)
-// 	return proxy, err
-// }
 
 // GetCountAll - get count of proxy
 func (db *DB) GetCountAll() int64 {
@@ -440,21 +405,40 @@ func (db *DB) Insert(p *Proxy) error {
 
 // Update - update existing proxy
 func (db *DB) Update(p *Proxy) error {
-	_, err := db.Pool.Exec(context.Background(), `
-		UPDATE
-			proxies
-		SET
-			scheme = $2,
-			host = $3,
-			port = $4,
-			work = $5,
-			anon = $6,
-			response = $7,
-			checks = $8,
-			update_at = $9
-		WHERE
-			hostname = $1
-	`, p.Hostname, p.Scheme, p.Host, p.Port, p.IsWork, p.IsAnon, p.Response, p.Checks, p.UpdateAt)
+	var err error
+	if p.IsWork {
+		_, err = db.Pool.Exec(context.Background(), `
+			UPDATE
+				proxies
+			SET
+				scheme = $2,
+				host = $3,
+				port = $4,
+				work = $5,
+				anon = $6,
+				response = $7,
+				checks = 0,
+				update_at = $8
+			WHERE
+				hostname = $1
+		`, p.Hostname, p.Scheme, p.Host, p.Port, p.IsWork, p.IsAnon, p.Response, p.UpdateAt)
+	} else {
+		_, err = db.Pool.Exec(context.Background(), `
+			UPDATE
+				proxies
+			SET
+				scheme = $2,
+				host = $3,
+				port = $4,
+				work = $5,
+				anon = $6,
+				response = $7,
+				checks = (SELECT checks FROM proxies WHERE hostname = $1) + 1,
+				update_at = $8
+			WHERE
+				hostname = $1
+		`, p.Hostname, p.Scheme, p.Host, p.Port, p.IsWork, p.IsAnon, p.Response, p.UpdateAt)
+	}
 	return err
 }
 
