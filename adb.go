@@ -10,13 +10,16 @@ import (
 
 var (
 	logErrors bool
-	pool      *pgxpool.Pool
 )
 
+// DB client pool
+type DB struct {
+	Pool *pgxpool.Pool
+}
+
 // InitDB - initializing the connection to the database
-func InitDB(dbURL string) {
-	var err error
-	pool, err = pgxpool.Connect(context.Background(), dbURL)
+func InitDB(dbURL string) *pgxpool.Pool {
+	pool, err := pgxpool.Connect(context.Background(), dbURL)
 	if err != nil {
 		log.Printf("Unable to connection to database: %v\n", err)
 		os.Exit(1)
@@ -25,6 +28,7 @@ func InitDB(dbURL string) {
 	if err != nil {
 		log.Fatal("InitDB error: ", err)
 	}
+	return pool
 }
 
 func errmsg(str string, err error) {

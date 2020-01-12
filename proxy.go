@@ -20,9 +20,9 @@ type Proxy struct {
 }
 
 // GetAll - get all proxies
-func GetAll() ([]Proxy, error) {
+func (db *DB) GetAll() ([]Proxy, error) {
 	var proxies []Proxy
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			work,
 			anon,
@@ -38,7 +38,7 @@ func GetAll() ([]Proxy, error) {
 			proxies
 	`)
 	if err != nil {
-		errmsg("GetAll Query", err)
+		errmsg("GetProxyAll Query", err)
 		return proxies, err
 	}
 	for rows.Next() {
@@ -47,7 +47,7 @@ func GetAll() ([]Proxy, error) {
 			&proxy.Host, &proxy.Port, &proxy.Scheme, &proxy.CreateAt, &proxy.UpdateAt,
 			&proxy.Response)
 		if err != nil {
-			errmsg("GetAll Scan", err)
+			errmsg("GetProxyAll Scan", err)
 			return proxies, err
 		}
 		proxies = append(proxies, proxy)
@@ -56,9 +56,9 @@ func GetAll() ([]Proxy, error) {
 }
 
 // // ProxyGetByID - get proxy by id
-// func GetByID(id int64) (Proxy, error) {
+// func (db *DB) GetByID(id int64) (Proxy, error) {
 // 	var proxy Proxy
-// 	err := pool.QueryRow(context.Background(), `
+// 	err := db.Pool.QueryRow(context.Background(), `
 // 		SELECT
 // 			work,
 // 			anon,
@@ -78,25 +78,25 @@ func GetAll() ([]Proxy, error) {
 // 	return proxy, err
 // }
 
-// GetAllCount - get count of proxy
-func GetAllCount() int64 {
+// GetCountAll - get count of proxy
+func (db *DB) GetCountAll() int64 {
 	var count int64
-	err := pool.QueryRow(context.Background(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT
 			COUNT(*)
 		FROM
 			proxies
 	`).Scan(&count)
 	if err != nil {
-		errmsg("GetAllCount QueryRow", err)
+		errmsg("GetCountAll QueryRow", err)
 	}
 	return count
 }
 
-// GetAllWorkCount - get count of working proxy
-func GetAllWorkCount() int64 {
+// GetCountAllWork - get count of working proxy
+func (db *DB) GetCountAllWork() int64 {
 	var count int64
-	err := pool.QueryRow(context.Background(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT
 			COUNT(*)
 		FROM
@@ -110,10 +110,10 @@ func GetAllWorkCount() int64 {
 	return count
 }
 
-// GetAllAnonymousCount - get count of anonymous proxy
-func GetAllAnonymousCount() int64 {
+// GetCountAllAnonymous - get count of anonymous proxy
+func (db *DB) GetCountAllAnonymous() int64 {
 	var count int64
-	err := pool.QueryRow(context.Background(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT
 			COUNT(*)
 		FROM
@@ -122,15 +122,15 @@ func GetAllAnonymousCount() int64 {
 			work = TRUE AND anon = TRUE
 	`).Scan(&count)
 	if err != nil {
-		errmsg("GetAllAnonymousCount QueryRow", err)
+		errmsg("GetCountAllAnonymous QueryRow", err)
 	}
 	return count
 }
 
-// GetAllSchemeCount - get count of proxies by scheme
-func GetAllSchemeCount(scheme string) int64 {
+// GetCountAllScheme - get count of proxies by scheme
+func (db *DB) GetCountAllScheme(scheme string) int64 {
 	var count int64
-	err := pool.QueryRow(context.Background(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT
 			COUNT(*)
 		FROM
@@ -139,15 +139,15 @@ func GetAllSchemeCount(scheme string) int64 {
 			scheme = $1
 	`, scheme).Scan(&count)
 	if err != nil {
-		errmsg("GetAllSchemeCount QueryRow", err)
+		errmsg("GetCountAllScheme QueryRow", err)
 	}
 	return count
 }
 
-// GetAllOldCount - get count of all old proxies
-func GetAllOldCount() int64 {
+// GetCountAllOld - get count of all old proxies
+func (db *DB) GetCountAllOld() int64 {
 	var count int64
-	err := pool.QueryRow(context.Background(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT
 			COUNT(*)
 		FROM
@@ -156,15 +156,15 @@ func GetAllOldCount() int64 {
 			work = true OR update_at < NOW() - (INTERVAL '3 days') * checks"
 	`).Scan(&count)
 	if err != nil {
-		errmsg("GetAllOldCount QueryRow", err)
+		errmsg("GetCountAllOld QueryRow", err)
 	}
 	return count
 }
 
-// GetAllWorkingSchemeCount - get count of working proxies by scheme
-func GetAllWorkingSchemeCount(scheme string) int64 {
+// GetCountAllWorkingScheme - get count of working proxies by scheme
+func (db *DB) GetCountAllWorkingScheme(scheme string) int64 {
 	var count int64
-	err := pool.QueryRow(context.Background(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT
 			COUNT(*)
 		FROM
@@ -173,15 +173,15 @@ func GetAllWorkingSchemeCount(scheme string) int64 {
 			work = true AND scheme = $1
 	`, scheme).Scan(&count)
 	if err != nil {
-		errmsg("GetAllWorkingSchemeCount QueryRow", err)
+		errmsg("GetCountAllWorkingScheme QueryRow", err)
 	}
 	return count
 }
 
-// GetAllAnonymousSchemeCount - get count of anonymous proxies by scheme
-func GetAllAnonymousSchemeCount(scheme string) int64 {
+// GetCountAllAnonymousScheme - get count of anonymous proxies by scheme
+func (db *DB) GetCountAllAnonymousScheme(scheme string) int64 {
 	var count int64
-	err := pool.QueryRow(context.Background(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT
 			COUNT(*)
 		FROM
@@ -190,26 +190,41 @@ func GetAllAnonymousSchemeCount(scheme string) int64 {
 			anon = true AND scheme = $1	
 	`, scheme).Scan(&count)
 	if err != nil {
-		errmsg("GetAllAnonymousSchemeCount QueryRow", err)
+		errmsg("GetCountAllAnonymousScheme QueryRow", err)
 	}
 	return count
 }
 
-// // ProxyGetAllScheme - get all proxies by scheme
-// func (a *ADB) ProxyGetAllScheme(v string) ([]Proxy, error) {
-// 	var proxies []Proxy
-// 	err := a.
-// 		db.
-// 		Model(&proxies).
-// 		Where("scheme = ?", v).
-// 		Select()
-// 	return proxies, err
-// }
+// GetAllScheme - get all proxies by scheme
+func (db *DB) GetAllScheme(scheme string) ([]string, error) {
+	var proxies []string
+	rows, err := db.Pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		WHERE
+			scheme = $1	
+	`, scheme)
+	if err != nil {
+		errmsg("GetAllScheme QueryRow", err)
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetAllScheme Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
 
 // GetAllOld - get all old proxies
-func GetAllOld() ([]string, error) {
+func (db *DB) GetAllOld() ([]string, error) {
 	var proxies []string
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			hostname
 		FROM
@@ -234,9 +249,9 @@ func GetAllOld() ([]string, error) {
 }
 
 // GetAllWorking - get all working proxies
-func GetAllWorking() ([]string, error) {
+func (db *DB) GetAllWorking() ([]string, error) {
 	var proxies []string
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			hostname
 		FROM
@@ -261,9 +276,9 @@ func GetAllWorking() ([]string, error) {
 }
 
 // GetAllWorkingScheme - get all working proxies by scheme
-func GetAllWorkingScheme(scheme string) ([]string, error) {
+func (db *DB) GetAllWorkingScheme(scheme string) ([]string, error) {
 	var proxies []string
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			hostname
 		FROM
@@ -288,9 +303,9 @@ func GetAllWorkingScheme(scheme string) ([]string, error) {
 }
 
 // GetAllAnonymous - get all anonymous proxies
-func GetAllAnonymous() ([]string, error) {
+func (db *DB) GetAllAnonymous() ([]string, error) {
 	var proxies []string
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			hostname
 		FROM
@@ -315,9 +330,9 @@ func GetAllAnonymous() ([]string, error) {
 }
 
 // GetAllAnonymousScheme - get all anonymous proxies by scheme
-func GetAllAnonymousScheme(scheme string) ([]string, error) {
+func (db *DB) GetAllAnonymousScheme(scheme string) ([]string, error) {
 	var proxies []string
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			hostname
 		FROM
@@ -342,9 +357,9 @@ func GetAllAnonymousScheme(scheme string) ([]string, error) {
 }
 
 // GetUniqueHosts - gel all unique proxy
-func GetUniqueHosts() ([]string, error) {
+func (db *DB) GetUniqueHosts() ([]string, error) {
 	var hosts []string
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			DISTINCT host
 		FROM
@@ -369,9 +384,9 @@ func GetUniqueHosts() ([]string, error) {
 }
 
 // GetFrequentlyUsedPorts - get 20 frequently used ports
-func GetFrequentlyUsedPorts() ([]int64, error) {
+func (db *DB) GetFrequentlyUsedPorts() ([]int64, error) {
 	var ports []int64
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			port
 		FROM
@@ -399,8 +414,8 @@ func GetFrequentlyUsedPorts() ([]int64, error) {
 }
 
 // Insert - insert new proxy
-func Insert(p *Proxy) error {
-	_, err := pool.Exec(context.Background(), `
+func (db *DB) Insert(p *Proxy) error {
+	_, err := db.Pool.Exec(context.Background(), `
 		INSERT INTO
 			proxies (
 				work,
@@ -421,8 +436,8 @@ func Insert(p *Proxy) error {
 }
 
 // Update - update existing proxy
-func Update(p *Proxy) error {
-	_, err := pool.Exec(context.Background(), `
+func (db *DB) Update(p *Proxy) error {
+	_, err := db.Pool.Exec(context.Background(), `
 		UPDATE
 			proxies
 		SET
@@ -442,9 +457,9 @@ func Update(p *Proxy) error {
 }
 
 // GetRandomWorking - get n random working proxies
-func GetRandomWorking(n int) ([]string, error) {
+func (db *DB) GetRandomWorking(n int) ([]string, error) {
 	var proxies []string
-	rows, err := pool.Query(context.Background(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
 			hostname
 		FROM
