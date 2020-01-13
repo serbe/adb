@@ -121,7 +121,7 @@ func (db *DB) GetCountAllOld() int64 {
 		FROM
 			proxies
 		WHERE
-			work = true OR update_at < NOW() - (INTERVAL '3 days') * checks"
+			work = true OR update_at < NOW() - (INTERVAL '3 days') * checks
 	`).Scan(&count)
 	if err != nil {
 		errmsg("GetCountAllOld QueryRow", err)
@@ -528,7 +528,7 @@ func (db *DB) CheckNotExists(s []string) ([]string, error) {
 			ORDER BY
 				id
 			OFFSET
-				?
+				$1
 			LIMIT
 				100000
 		`, j*100000)

@@ -24,5 +24,6 @@ CREATE TABLE proxies
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE public.proxies
+
+ALTER TABLE proxies
   OWNER TO pr;
