@@ -8,17 +8,17 @@ import (
 
 // Proxy - proxy unit
 type Proxy struct {
-	ID       int64         `sql:"id,pk,notnull"       json:"-"`
-	Scheme   string        `sql:"scheme,notnull"      json:"-"`
-	Hostname string        `sql:"hostname,pk,notnull" json:"hostname"`
-	Host     string        `sql:"host,notnull"        json:"-"`
-	Port     int           `sql:"port,notnull"        json:"-"`
-	IsWork   bool          `sql:"work,notnull"        json:"-"`
-	IsAnon   bool          `sql:"anon,notnull"        json:"-"`
-	Response time.Duration `sql:"response,notnull"    json:"-"`
-	Checks   int           `sql:"checks,notnull"      json:"-"`
-	CreateAt time.Time     `sql:"create_at,notnull"   json:"-"`
-	UpdateAt time.Time     `sql:"update_at,notnull"   json:"-"`
+	ID       int64         `sql:"id,pk,notnull"     json:"-"`
+	Scheme   string        `sql:"scheme,notnull"    json:"-"`
+	Hostname string        `sql:"hostname,notnull"  json:"hostname"`
+	Host     string        `sql:"host,notnull"      json:"-"`
+	Port     int           `sql:"port,notnull"      json:"-"`
+	IsWork   bool          `sql:"work,notnull"      json:"-"`
+	IsAnon   bool          `sql:"anon,notnull"      json:"-"`
+	Response time.Duration `sql:"response,notnull"  json:"-"`
+	Checks   int           `sql:"checks,notnull"    json:"-"`
+	CreateAt time.Time     `sql:"create_at,notnull" json:"-"`
+	UpdateAt time.Time     `sql:"update_at,notnull" json:"-"`
 }
 
 // GetAll - get all proxies
