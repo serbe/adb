@@ -243,6 +243,35 @@ func (db *DB) GetAllWorking() ([]string, error) {
 	return proxies, rows.Err()
 }
 
+// GetLast - get last updated proxies
+func (db *DB) GetLast(limit int64) ([]string, error) {
+	var proxies []string
+	rows, err := db.Pool.Query(context.Background(), `
+		SELECT
+			hostname
+		FROM
+			proxies
+		ORDER BY
+			update_at DESC
+		LIMIT
+			$1
+	`)
+	if err != nil {
+		errmsg("GetLast Query", err)
+		return proxies, err
+	}
+	for rows.Next() {
+		var proxy string
+		err := rows.Scan(&proxy)
+		if err != nil {
+			errmsg("GetLast Scan", err)
+			return proxies, err
+		}
+		proxies = append(proxies, proxy)
+	}
+	return proxies, rows.Err()
+}
+
 // GetAllWorkingScheme - get all working proxies by scheme
 func (db *DB) GetAllWorkingScheme(scheme string) ([]string, error) {
 	var proxies []string
