@@ -255,7 +255,7 @@ func (db *DB) GetLast(limit int64) ([]string, error) {
 			update_at DESC
 		LIMIT
 			$1
-	`)
+	`, limit)
 	if err != nil {
 		errmsg("GetLast Query", err)
 		return proxies, err
